@@ -4,8 +4,11 @@
   "description": "Pulls data from the Condor Info repo and publishes it as a MD Book",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "deploy": "mdbook build && npx gh-pages -d book"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "gh-pages": "^6.1.1"
+  }
 }
