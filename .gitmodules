@@ -1,0 +1,3 @@
+[submodule "src/condor-info"]
+	path = src/condor-info
+	url = git@github.com:casper-network/condor-info.git
