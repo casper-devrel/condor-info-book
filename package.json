@@ -1,0 +1,11 @@
+{
+  "name": "condor-info-book",
+  "version": "1.0.0",
+  "description": "Pulls data from the Condor Info repo and publishes it as a MD Book",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
