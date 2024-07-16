@@ -1,0 +1,802 @@
+<!DOCTYPE HTML>
+<html lang="en" class="dark" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Casper 2.0 (Condor) Knowledge Base</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="A guide to Casper v2.0 (Condor).">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="./theme/catppuccin.css">
+        <link rel="stylesheet" href="./theme/catppuccin-admonish.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "coal" : "dark";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('dark')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="condor-info/index.html">Introduction</a></li><li class="chapter-item expanded affix "><a href="condor-info/faqs/current.html">Frequently Asked Questions</a></li><li class="chapter-item expanded "><a href="condor-info/articles/001.html"><strong aria-hidden="true">1.</strong> Condor Deep Dive Part 1</a></li><li class="chapter-item expanded "><a href="condor-info/articles/033-devnet.html"><strong aria-hidden="true">2.</strong> Applying for Devnet</a></li><li class="chapter-item expanded "><a href="condor-info/articles/004-local-setup.html"><strong aria-hidden="true">3.</strong> Running a local NCTL network with Condor</a></li><li class="chapter-item expanded "><a href="condor-info/articles/XXX-addressable_entity.html"><strong aria-hidden="true">4.</strong> Addressable Entity</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="latte">Latte</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="frappe">Frappé</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="macchiato">Macchiato</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mocha">Mocha</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Casper 2.0 (Condor) Knowledge Base</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/casper-network/condor-info" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="casper-20-knowledge-base"><a class="header" href="#casper-20-knowledge-base">Casper 2.0 Knowledge Base</a></h1>
+<p>Welcome to the offical Condor (Casper 2.0) Knowledge Base (KB), a one-stop shop for all information regarding the upcoming Casper 2.0 release.</p>
+<p>Here you can</p>
+<ul>
+<li>Read deep dive technical articles</li>
+<li>Participate in discussions</li>
+<li>Submit issues</li>
+<li>Leave suggestions &amp; comments etc.</li>
+<li>Search via keyword</li>
+</ul>
+<h2 id="your-journey"><a class="header" href="#your-journey">Your Journey</a></h2>
+<p>If you have any questions, comments or concerns then <strong>your first point of call</strong> should be reviewing the <a href="https://github.com/casper-network/condor-info/discussions">discussion forum</a>.  If you do not see a relevant discussion then proceed to review the Wiki, FAQs, Issues, Articles …etc.  If you still do not find the information that you are seeking then <strong>OPEN A DISCUSSION THREAD</strong>.</p>
+<h2 id="discussions"><a class="header" href="#discussions">Discussions</a></h2>
+<p>The discussions forum will be used extensively.  Please actively participate when and where it makes sense to you.  Over time a healthy and transparent discussions forum will allow the community to leverage it;s collective intelligence for the greater good.</p>
+<h2 id="wiki"><a class="header" href="#wiki">Wiki</a></h2>
+<p>The in-built GitHub wiki engine will be used to collate and publish content related to various topics of interest.  Feel free to suggest topics to the team via the discussion forum.</p>
+<h2 id="folders"><a class="header" href="#folders">Folders</a></h2>
+<p><strong>/articles</strong></p>
+<ul>
+<li>
+<p>Condor deep dive articles in markdown format</p>
+</li>
+<li>
+<p>Will be published in upstream comms channels such as medium</p>
+</li>
+<li>
+<p>To contribute please submit a PR:</p>
+<ul>
+<li>
+<p>An editor will review the article and provide feedback</p>
+</li>
+<li>
+<p>If the PR is merged then it will be published upstream</p>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>/faqs</strong></p>
+<ul>
+<li>
+<p>Frequently Asked Questions in markdown format</p>
+</li>
+<li>
+<p>Will be published in upstream comms channels</p>
+</li>
+<li>
+<p>To contribute please open a discussion thread:</p>
+<ul>
+<li>
+<p>Prefix the discussion thread title with FAQ</p>
+</li>
+<li>
+<p>Discussion moderators will review the thread</p>
+</li>
+<li>
+<p>If the discussion merits an official FAQ then the moderator will:</p>
+<ul>
+<li>
+<p>Formulate the offical FAQ title &amp; response</p>
+</li>
+<li>
+<p>Add the FAQ to the appropriate section</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h3 id="what-is-condor"><a class="header" href="#what-is-condor">What is Condor?</a></h3>
+<p>Condor is the code name given to version 2.0 of the Casper platform, it represents a significant upgrade with a slew of new features accompanied by innumerable optimizations &amp; improvements.</p>
+<h3 id="what-are-the-main-components-of-condor"><a class="header" href="#what-are-the-main-components-of-condor">What are the main components of Condor?</a></h3>
+<ul>
+<li>casper-node: The core node software.</li>
+<li>casper-node-launcher: Manages node orchestration.</li>
+<li>casper-sidecar: New component for handling non-essential tasks like the JSON-RPC API.</li>
+</ul>
+<h3 id="what-are-the-benefits-of-decoupling-essential-and-non-essential-tasks"><a class="header" href="#what-are-the-benefits-of-decoupling-essential-and-non-essential-tasks">What are the benefits of decoupling essential and non-essential tasks?</a></h3>
+<ul>
+<li>Enhanced control over performance and security.</li>
+<li>Independent evolution of the JSON-RPC API.</li>
+<li>Simplified development of alternative protocol clients.</li>
+</ul>
+<h3 id="is-there-any-limit-for-storing-values-within-a-contract"><a class="header" href="#is-there-any-limit-for-storing-values-within-a-contract">Is there any limit for storing values within a contract?</a></h3>
+<p>There is no physical limit on the total bytes written. However, the effective limit for storing data during a single contract call is determined by the gas limit. It currently costs 1,117,587 gas to write one byte to the global state, considering raw data only. Various weight multipliers and limits per operation, such as the maximum length of a dictionary item key, also apply. If you need more details, please let us know.</p>
+<h3 id="how-can-i-create-accounts-in-a-locally-running-nctl-network"><a class="header" href="#how-can-i-create-accounts-in-a-locally-running-nctl-network">How can I create accounts in a locally running NCTL network?</a></h3>
+<p>Within the assets folder, you will find a users subfolder. This folder contains 10 test user accounts, each prefunded via the genesis accounts.toml. These accounts can be used for testing purposes in your local NCTL network setup.</p>
+<h3 id="is-there-an-interface-for-gas-held"><a class="header" href="#is-there-an-interface-for-gas-held">Is there an interface for gas held?</a></h3>
+<p>You can use the query_balance_details interface to check the gas held for a specific account. The holds represent gas held for gas fees, which are placed in a “hold” for a configurable period (currently 24 hours). During this time, the gas remains in the entity’s purse but is unavailable for transactions. Tracking the total gas held requires monitoring each account and the lifetime of each hold separately.</p>
+<p>For more details, refer to the query_balance_details interface.</p>
+<h3 id="what-new-services-are-available"><a class="header" href="#what-new-services-are-available">What new services are available?</a></h3>
+<ul>
+<li>Node: Protocol Server, REST Server, Binary Server, SSE Server.</li>
+<li>Sidecar: Main Server (JSON-RPC API), Speculative Execution Server.</li>
+</ul>
+<h3 id="what-changes-have-been-made-to-the-api"><a class="header" href="#what-changes-have-been-made-to-the-api">What changes have been made to the API?</a></h3>
+<ul>
+<li>Distributed across node and sidecar.</li>
+<li>Introduction of the node binary API.</li>
+<li>Rationalized SSE API.</li>
+<li>New and renamed JSON-RPC API endpoints.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="casper-20-deep-dive-i"><a class="header" href="#casper-20-deep-dive-i">Casper 2.0 Deep Dive I</a></h1>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>Condor is the code name given to version 2.0 of the Casper platform, it represents a significant upgrade with a slew of new features accompanied by innumerable  optimisations &amp; improvements.  This is the first article in an extended series that aims to provide a high to medium level insight into the extensive work that has gone into the Condor release.  By the end of the series, the astute reader should have gained a fairly deep understanding of the Casper 2.0 platform.  Ideally they will be ready to take on the challenge of contributing to the platform as either an operator, a DApp developer and/or a core contributor.</p>
+<p>In this article we examine the node software from the operator’s perspective.  I.E. what does an out of the box Casper 2.0 node setup look like in comparison to a Casper 1.X setup ?  Let’s begin by reviewing changes to the set of binaries, running processes, exposable ports, and API surface.</p>
+<h2 id="binaries-processes-ports--apis"><a class="header" href="#binaries-processes-ports--apis">Binaries, Processes, Ports &amp; API’s</a></h2>
+<p>In Condor the software has been factored out into three binaries, i.e. casper-node, casper-node-launcher and the new <strong>casper-sidecar</strong>.  Whilst the node process continues to be orchestrated by the node launcher, it’s functionality has been stripped back to the bare minimum required to participate in the network and to act as a verifiable source of truth.  All <strong>non-essential</strong> work has been off-loaded to the sidecar- this includes the JSON-RPC API.</p>
+<p>Decoupling the processing of essential from non-essential work has advantages.  Firstly an operator is granted a finer degree of control over their operational setup in terms of performance &amp; security.  Secondly the JSON-RPC API can evolve independently of the core protocol, i.e. a change in the JSON-RPC will no longer trigger a protocol upgrade.  Lastly by stripping back the node’s functionality to the essentials it is easier to build alternative protocol clients (e.g. Go, Carbon, Zig, C++ …etc).</p>
+<p>Such decoupling extends to the physical processes within which the binaries are executing.  This allows the node and sidecar binaries to be deployed to either a single machine or a pair of machines. It should be noted that sidecar binds to a port expsoed by the node, thus the dependency is one way.  From the node’s perspective the sidecar is simply another software agent binding to an exposed port.</p>
+<p>With respect to services an operator now has the option to enable the node’s new <strong>binary API service</strong>.  This new service supports chain queries, node queries and transaction handling.  All data flowing in and out of this service is binary encoded.  This optimisation significantly reduces the cost of serialisation and deserialisation.    The sidecar is a consumer of this new service.</p>
+<p>As before, with the exception of the node’s protocol network port, an operator can opt out of running any of the services running behind exposed ports.  The following lists the set of services running upon the node and sidecar.</p>
+<ul>
+<li>
+<p><strong>Node</strong></p>
+<ul>
+<li>
+<p><strong>Protocol</strong></p>
+<ul>
+<li>Protocol peer to peer network</li>
+<li>Mandatory</li>
+<li>Default Port = 34553</li>
+</ul>
+</li>
+<li>
+<p><strong>REST Server</strong></p>
+<ul>
+<li>Convenience API suitable for curl &amp; browsers</li>
+<li>Optional</li>
+<li>Default Port = 8888</li>
+</ul>
+</li>
+<li>
+<p><strong>Binary Server</strong></p>
+<ul>
+<li>Rich API for dispatching transactions into the network and for querying the node and/or chain state</li>
+<li>Optional</li>
+<li>Default Port = 7777</li>
+</ul>
+</li>
+<li>
+<p><strong>SSE (Server Side Events) Server</strong></p>
+<ul>
+<li>Realtime API of events emitted by the node when processing blocks and/or transactions</li>
+<li>Optional</li>
+<li>Default Port = 9999</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Sidecar</strong></p>
+<ul>
+<li>
+<p><strong>JSON-RPC Server: Main</strong></p>
+<ul>
+<li>Rich API for dispatching transactions into the network and for querying chain/node state</li>
+<li>Optional</li>
+<li>Default Port = 7777</li>
+</ul>
+</li>
+<li>
+<p><strong>JSON-RPC Server: Speculative Execution</strong></p>
+<ul>
+<li>Specialized API for speculatively executing a transaction</li>
+<li>Optional</li>
+<li>Default Port = 7778</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="api-surface"><a class="header" href="#api-surface">API Surface</a></h3>
+<p>Whilst changes to the API surface have been minimised, nevertheless there are several changes:</p>
+<ul>
+<li>
+<p>API surface is now distributed over both the node and sidecar.</p>
+</li>
+<li>
+<p>API endpoint request/response data types have changed in some cases.</p>
+</li>
+<li>
+<p>Node binary API has been added.</p>
+</li>
+<li>
+<p>Node SSE API has been rationalised and now exposes a single event channel.</p>
+</li>
+<li>
+<p>JSON-RPC API has been moved to sidecar.</p>
+</li>
+<li>
+<p>JSON-RPC API endpoints have been added and/or renamed.</p>
+</li>
+<li>
+<p>Speculative Execution API has been moved to sidecar.</p>
+</li>
+</ul>
+<p>The following summarises the new or renamed endpoints served by the various API servers at the time of writing.  We exclude the protocol endpoints as they are effectively internal to the system.</p>
+<ul>
+<li>
+<p><strong>Node</strong></p>
+<ul>
+<li>
+<p><strong>SSE (Server Side Events)</strong></p>
+<ul>
+<li>Main.FinalitySignature</li>
+<li>Main.Shutdown</li>
+<li>Main.TransactionAccepted (rename)</li>
+<li>Main.TransactionExpired (rename)</li>
+<li>Main.TransactionProcessed (rename)</li>
+</ul>
+</li>
+<li>
+<p><strong>Binary</strong></p>
+<ul>
+<li>Get
+<ul>
+<li>Record
+<ul>
+<li>ApprovalsHashes</li>
+<li>BlockHeader</li>
+<li>BlockBody</li>
+<li>BlockMetadata</li>
+<li>ExecutionResult</li>
+<li>FinalizedTransactionApprovals</li>
+<li>Transaction</li>
+<li>Transfer</li>
+</ul>
+</li>
+<li>Information
+<ul>
+<li>AvailableBlockRange</li>
+<li>BlockHeader</li>
+<li>BlockSynchronizerStatus</li>
+<li>ChainspecRawBytes</li>
+<li>ConsensusStatus</li>
+<li>ConsensusValidatorChanges</li>
+<li>LastProgress</li>
+<li>LatestSwitchBlockHeader</li>
+<li>NetworkName</li>
+<li>NextUpgrade</li>
+<li>NodeStatus</li>
+<li>Peers</li>
+<li>ReactorState</li>
+<li>SignedBlock</li>
+<li>Transaction</li>
+<li>Uptime</li>
+</ul>
+</li>
+<li>State
+<ul>
+<li>Balance</li>
+<li>DictionaryItem</li>
+<li>Item</li>
+<li>ItemsByPrefix</li>
+<li>AllItems</li>
+<li>Trie</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Try
+<ul>
+<li>AcceptTransaction</li>
+<li>SpeculativeExec</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Sidecar</strong></p>
+<ul>
+<li>
+<p><strong>JSON-RPC: Main</strong></p>
+<ul>
+<li>account_put_transaction</li>
+<li>info_get_transaction</li>
+<li>query_balance_details</li>
+<li>state_get_entity</li>
+</ul>
+</li>
+<li>
+<p><strong>JSON-RPC: Speculative Execution</strong></p>
+<ul>
+<li>speculative_exec_txn</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
+<p>Condor is the code name given to version 2.0 of the Casper platform, it represents a significant upgrade with a slew of new features accompanied by innumerable  optimisations &amp; improvements.  This was the first article in an extended series that aims to provide a high to medium level insight into the extensive work that has gone into the Condor release.  We examined the node software from the operator’s perspective by reviewing changes to the set of binaries, running processes, exposable ports, and API surface.</p>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="connecting-to-devnet"><a class="header" href="#connecting-to-devnet">Connecting to Devnet</a></h2>
+<h3 id="introduction-1"><a class="header" href="#introduction-1">Introduction</a></h3>
+<p>The Casper Condor release is being rolled out in a phased fashion, allowing people to test their code, SDKs and smart contracts, before migrating to MainNet. The first phase of this is rolling out to <strong>DevNet</strong>. This article is a guide to the process for gaining access to DevNet, what to expect when you do access DevNet, and any other concerns.</p>
+<h3 id="requesting-access"><a class="header" href="#requesting-access">Requesting Access</a></h3>
+<p>You can request access to Devnet using the provided form here: <a href="https://docs.google.com/forms/d/e/1FAIpQLSe7K6IYZ_PJbutu7a2mQt1rQ3K1TXNkHQS6w7Nsx1LOdcTV2w/viewform">https://docs.google.com/forms/d/e/1FAIpQLSe7K6IYZ_PJbutu7a2mQt1rQ3K1TXNkHQS6w7Nsx1LOdcTV2w</a></p>
+<p>Be sure to include a valid Casper public key in this form, which we will fund with CSPR token to allow you to test.</p>
+<p>Once your request hads been processed, you will be notified and provided with a list of IP addresses to connect to DevNet.</p>
+<p>At time of writing (8 July 2024) there is no Block Explorer for Devnet, but we hope to be able to provide one within the next week.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="setting-up-a-local-casper-condor-network-for-development"><a class="header" href="#setting-up-a-local-casper-condor-network-for-development">Setting Up a Local Casper Condor Network for Development</a></h1>
+<p>Casper Condor is a major upgrade to the Casper Network. This guide walks you through creating a local Condor environment for testing and development using Dockerized NCTL and the Rust Casper Client.</p>
+<h2 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h2>
+<ul>
+<li>Docker installed and running on your machine</li>
+</ul>
+<h2 id="part-1-the-dockerized-nctl-network-control-tool"><a class="header" href="#part-1-the-dockerized-nctl-network-control-tool">Part 1: The Dockerized NCTL (Network Control Tool)</a></h2>
+<p>NCTL is your tool for managing the Casper network. We’ll use a Dockerized version for easier setup.</p>
+<ol>
+<li>
+<p><strong>Clone the Repository:</strong></p>
+<pre><code class="language-bash">git clone https://github.com/make-software/casper-nctl-docker.git
+cd casper-nctl-docker
+</code></pre>
+</li>
+<li>
+<p><strong>Switch to the Condor Branch:</strong></p>
+<pre><code class="language-bash">git checkout feat-2.0
+</code></pre>
+</li>
+<li>
+<p><strong>Clone the <code>casper-node</code> Repository:</strong></p>
+<pre><code class="language-bash">git clone https://github.com/casper-network/casper-node.git
+cd casper-node
+git checkout release-2.0.0-rc3
+</code></pre>
+<p>Ensure you’re in the <code>casper-nctl-docker</code> directory when running this command</p>
+</li>
+<li>
+<p><strong>Build the Docker Image:</strong></p>
+<pre><code class="language-bash">docker build -f casper-nctl-condor.Dockerfile -t casper-nctl:rc3 .
+</code></pre>
+<p>This may take a while</p>
+</li>
+<li>
+<p><strong>Verify the Image:</strong></p>
+<pre><code class="language-bash">docker image ls
+</code></pre>
+<p>Look for the <code>casper-nctl:rc3</code> image in the output</p>
+<pre><code>REPOSITORY                 TAG        IMAGE ID       CREATED        SIZE
+casper-nctl                rc3        9fd1e7b25d42   40 hours ago   433MB
+</code></pre>
+</li>
+<li>
+<p><strong>Start the NCTL Docker Container:</strong></p>
+<ul>
+<li>
+<p><strong>Docker Compose (Recommended):</strong> If you’re using the <code>docker-compose.yml</code> file, make sure that  the <code>image</code> under the <code>mynctl</code> service points to <code>casper-nctl:rc3</code>. Then run <code>docker-compose up</code>.</p>
+</li>
+<li>
+<p><strong>Manual Docker Command:</strong></p>
+<pre><code class="language-bash">docker run -d --name mynctl -p 11101:11101 casper-nctl:rc3
+</code></pre>
+<p>Once it is up and running you should see that there are 5 nodes and 5 sidecars running and another 5 nodes and 5 sidecars that are inactive:</p>
+<pre><code> casper-nctl  | validators-1:casper-net-1-node-1       RUNNING   pid 996, uptime 0:00:03
+ casper-nctl  | validators-1:casper-net-1-node-2       RUNNING   pid 998, uptime 0:00:03
+ casper-nctl  | validators-1:casper-net-1-node-3       RUNNING   pid 1002, uptime 0:00:03
+ casper-nctl  | validators-1:casper-net-1-sidecar-1    RUNNING   pid 997, uptime 0:00:03
+ casper-nctl  | validators-1:casper-net-1-sidecar-2    RUNNING   pid 1000, uptime 0:00:03
+ casper-nctl  | validators-1:casper-net-1-sidecar-3    RUNNING   pid 1011, uptime 0:00:03
+ casper-nctl  | validators-2:casper-net-1-node-4       RUNNING   pid 1082, uptime 0:00:02
+ casper-nctl  | validators-2:casper-net-1-node-5       RUNNING   pid 1084, uptime 0:00:02
+ casper-nctl  | validators-2:casper-net-1-sidecar-4    RUNNING   pid 1083, uptime 0:00:02
+ casper-nctl  | validators-2:casper-net-1-sidecar-5    RUNNING   pid 1085, uptime 0:00:02
+ casper-nctl  | validators-3:casper-net-1-node-10      STOPPED   Not started
+ casper-nctl  | validators-3:casper-net-1-node-6       STOPPED   Not started
+ casper-nctl  | validators-3:casper-net-1-node-7       STOPPED   Not started
+ casper-nctl  | validators-3:casper-net-1-node-8       STOPPED   Not started
+ casper-nctl  | validators-3:casper-net-1-node-9       STOPPED   Not started
+ casper-nctl  | validators-3:casper-net-1-sidecar-10   STOPPED   Not started
+ casper-nctl  | validators-3:casper-net-1-sidecar-6    STOPPED   Not started
+ casper-nctl  | validators-3:casper-net-1-sidecar-7    STOPPED   Not started
+ casper-nctl  | validators-3:casper-net-1-sidecar-8    STOPPED   Not started
+ casper-nctl  | validators-3:casper-net-1-sidecar-9    STOPPED   Not started
+</code></pre>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="part-2-casper-client-rust"><a class="header" href="#part-2-casper-client-rust">Part 2: Casper Client (Rust)</a></h2>
+<p>To interact with your local Condor network, we’ll use the Casper Client. You have two options for using the Casper Client:</p>
+<p><strong>Option 1: Using the Casper Client from the Docker Image</strong></p>
+<ul>
+<li>The <code>casper-nctl:rc3</code> Docker image already includes the <code>casper-client</code>.</li>
+<li>You can skip the next two steps if you want to use the pre-installed client.</li>
+</ul>
+<p><strong>Option 2: Using Your Local Casper Client</strong></p>
+<ol>
+<li>
+<p><strong>Clone the Repository (Optional):</strong></p>
+<pre><code class="language-bash">git clone https://github.com/casper-ecosystem/casper-client-rs.git
+cd casper-client-rs
+</code></pre>
+</li>
+<li>
+<p><strong>Switch to the Condor-Compatible Branch  (Optional):</strong></p>
+<pre><code class="language-bash">git checkout feat-track-node-2.0
+</code></pre>
+</li>
+<li>
+<p><strong>Activate NCTL scripts:</strong></p>
+<pre><code class="language-bash">source nctl-activate.sh casper-nctl
+</code></pre>
+</li>
+</ol>
+<p>4 <strong>Test Your Setup:</strong></p>
+<pre><code class="language-bash">nctl-view-node-status
+</code></pre>
+<p>This command should return the status of all the nodes running in your local network, indicating a successful setup. The output should look similar to this:</p>
+<pre><code>------------------------------------------------------------------------------------------------------------------------------------
+2024-07-10T15:31:42.181535 [INFO] [2043] NCTL :: node #1 :: status:
+{
+"api_version": "2.0.0",
+"peers": [
+   {
+      "node_id": "tls:05b5..7b39",
+      "address": "127.0.0.1:22103"
+   },
+   {
+      "node_id": "tls:527e..37d2",
+      "address": "127.0.0.1:22105"
+   },
+   {
+      "node_id": "tls:b1d0..870f",
+      "address": "127.0.0.1:22102"
+   },
+   {
+      "node_id": "tls:dcdf..e348",
+      "address": "127.0.0.1:22104"
+   }
+],
+"build_version": "2.0.0-d5c0d238f",
+"chainspec_name": "casper-net-1",
+"starting_state_root_hash": "2d92cf9f3ff3eb70f40be598b61cbf747c1b5ea67df9596d84a88c5458028a80",
+"last_added_block_info": {
+   "hash": "c1056e0e5978e725777f48e4488462d7794e6547f25b1fbcc4ba261ca2864395",
+   "timestamp": "2024-07-10T15:31:38.601Z",
+   "era_id": 19,
+   "height": 205,
+   "state_root_hash": "6c5502c3443f526e943fa5a5421349e938464c063c8dd0ada616c997e3805612",
+   "creator": "0190664e16a17594ed2d0e3c279c4cf5894e8db0da15e3b91c938562a1caae32ab"
+},
+"our_public_signing_key": "01fed662dc7f1f7af43ad785ba07a8cc05b7a96f9ee69613cfde43bc56bec1140b",
+"round_length": "4s 96ms",
+"next_upgrade": null,
+"uptime": "13m 15s",
+"reactor_state": "Validate",
+"last_progress": "2024-07-10T15:18:26.354Z",
+"available_block_range": {
+   "low": 0,
+   "high": 205
+},
+"block_sync": {
+   "historical": null,
+   "forward": null
+},
+"latest_switch_block_hash": "5192198c783ed8b66e206c37b34c5e268c84be2f4b78dd9899eecf5f37fb9f68"
+}
+.
+.
+.
+</code></pre>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<p><strong>If sidecars or nodes are not running:</strong> If you see <code>null</code> values under each node in the output of <code>nctl-view-node-status</code>, it means the version of <code>casper-sidecar</code> is not compatible with the <code>casper-node</code>.</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>
+<p>Go to the <code>casper-node/ci/ci.json</code> file.</p>
+</li>
+<li>
+<p>Change the <code>casper-sidecar</code> branch under <code>external_deps</code> from:</p>
+<pre><code class="language-json">"branch": "feat-2.0"
+</code></pre>
+<p>to:</p>
+<pre><code class="language-json">"branch": "release-1.0.0rc2_node-2.0.0rc3" 
+</code></pre>
+<p>This is because the <code>casper-node</code> we are using is <code>release-2.0.0-rc3</code>. The required combination of versions of <code>casper-sidecar</code> and <code>casper-node</code> may change in the future (rc4 etc.).</p>
+</li>
+<li>
+<p>Rebuild the NCTL image: <code>docker build -f casper-nctl-condor.Dockerfile -t casper-nctl:rc3 .</code></p>
+</li>
+</ol>
+<h2 id="using-the-casper-client"><a class="header" href="#using-the-casper-client">Using the Casper Client</a></h2>
+<ul>
+<li><strong>Command Format(Using local casper-client):</strong> <code>cargo run --release [command] --node-address http://127.0.0.1:11101</code></li>
+<li><strong>Command Format(Using casper-client from the docker image):</strong> <code>casper-client [command] --node-address http://127.0.0.1:11101</code></li>
+</ul>
+<h2 id="accessing-the-nctl-block-web-explorer"><a class="header" href="#accessing-the-nctl-block-web-explorer">Accessing the NCTL Block Web Explorer</a></h2>
+<p>The NCTL Docker setup includes a web-based block explorer.  You can access it in your browser at:</p>
+<pre><code>http://127.0.0.1:8080
+</code></pre>
+<p>This allows you to visually explore blocks, transactions, and other details of your local network.</p>
+<h2 id="important-notes"><a class="header" href="#important-notes">Important Notes</a></h2>
+<ul>
+<li><strong>Work in Progress:</strong> Condor compatibility is still evolving. Some features may be unstable or incomplete.</li>
+</ul>
+<h2 id="additional-tips"><a class="header" href="#additional-tips">Additional Tips</a></h2>
+<ul>
+<li><strong>Community Resources:</strong> Join the <a href="https://t.me/CSPRCondor">Casper Telegram</a> for help and discussion.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="addressableentity-in-casper-20"><a class="header" href="#addressableentity-in-casper-20">AddressableEntity in Casper 2.0</a></h1>
+<p>Casper 2.0 introduces significant changes in the representation and management of accounts and smart contracts, through the introduction of the <code>AddressableEntity</code> type. This new structure replaces the separate <code>AccountHash</code> and <code>ContractHash</code> used in Casper 1.x, bringing a unified approach to interact with entities on the network. Contracts can now hold and manage funds directly through associated purses, similar to user accounts. They can also manage their own keys, enabling more sophisticated access control.</p>
+<p>In this article, we’ll dive into the details of <code>AddressableEntity</code>, exploring its structure and functionalities.</p>
+<h2 id="key-concepts"><a class="header" href="#key-concepts">Key Concepts</a></h2>
+<p><strong>AddressableEntity</strong></p>
+<p>At its core, an <code>AddressableEntity</code> is a versatile data structure that represents both accounts and smart contracts within the Casper global state. It encapsulates all the necessary information for identifying and managing these entities. An <code>AddressableEntity</code> provides a unified interface for various operations, including authorization, access control, and execution of functions.</p>
+<p><strong>EntityAddr</strong></p>
+<p>An <code>EntityAddr</code> serves as the address for an <code>AddressableEntity</code>. It not only encodes the unique identifier (hash) of the entity but also its type. There are three distinct variants of <code>EntityAddr</code>:</p>
+<ol>
+<li><strong>System:</strong> Used for built-in, native contracts crucial for the blockchain’s operation.</li>
+<li><strong>Account:</strong>  Represents a user’s account.</li>
+<li><strong>SmartContract:</strong> Represents a user-deployed smart contract.</li>
+</ol>
+<p><strong>AddressableEntityHash</strong></p>
+<p>The <code>AddressableEntityHash</code> is a newtype wrapper around a 32-byte hash (<code>HashAddr</code>). This hash functions as a unique identifier for the <code>AddressableEntity</code>, typically derived from either the account’s public key or the smart contract’s hash using hashing algorithm.</p>
+<h2 id="the-inner-workings-of-addressableentity"><a class="header" href="#the-inner-workings-of-addressableentity">The inner workings of AddressableEntity</a></h2>
+<p>Let’s dive into the critical components within an <code>AddressableEntity</code>:</p>
+<ul>
+<li><strong><code>protocol_version</code> (ProtocolVersion):</strong>  This field indicates the protocol version that the entity is compatible with. It ensures backward compatibility and allows for smooth upgrades as the Casper network evolves.</li>
+<li><strong><code>entity_kind</code> (EntityKind):</strong> As mentioned earlier, this enum determines the type of entity – System, Account, or SmartContract.</li>
+<li><strong><code>associated_keys</code> (AssociatedKeys):</strong> This data structure stores a map of public keys authorized to interact with the entity. Each key is associated with a weight that represents its voting power in decision-making processes within the entity.</li>
+<li><strong><code>action_thresholds</code> (ActionThresholds):</strong> These thresholds define the minimum combined weight of associated keys required to authorize specific actions. The three main action types are <code>deployment</code>, <code>key_management</code>, and <code>upgrade_management</code>. Each action type has its own weight threshold, allowing for fine-grained control over permissions.</li>
+<li><strong><code>entry_points</code> (EntryPoints):</strong> This component is relevant only for smart contracts. It defines the functions (entry points) that external actors can call on the contract, along with their parameters, return types, and access permissions.</li>
+</ul>
+<h2 id="obtaining-and-converting-keys"><a class="header" href="#obtaining-and-converting-keys">Obtaining and converting Keys</a></h2>
+<p>In Casper 2.0, developers will primarily work with <code>Key::AddressableEntity</code> when referring to accounts and smart contracts. Here’s how you can create them and convert between different key formats:</p>
+<h3 id="creating-addressableentity-keys"><a class="header" href="#creating-addressableentity-keys">Creating AddressableEntity Keys</a></h3>
+<p><strong>From Account Hash:</strong></p>
+<pre><pre class="playground"><code class="language-rust edition2018"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let addressable_entity_key = Key::AddressableEntity(EntityAddr::Account(account_hash)); 
+<span class="boring">}</span></code></pre></pre>
+<p><strong>From Smart Contract Hash:</strong></p>
+<pre><pre class="playground"><code class="language-rust edition2018"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let addressable_entity_key = Key::AddressableEntity(EntityAddr::SmartContract(contract_hash));
+<span class="boring">}</span></code></pre></pre>
+<h3 id="extracting-accounthash-or-contracthash-from-a-key"><a class="header" href="#extracting-accounthash-or-contracthash-from-a-key">Extracting AccountHash or ContractHash from a Key</a></h3>
+<p>You can extract the <code>AccountHash</code> or <code>ContractHash</code> from a <code>Key::AddressableEntity</code> using pattern matching:</p>
+<pre><pre class="playground"><code class="language-rust edition2018"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>//For Accounts
+let account_hash = match addressable_entity_key {
+    Key::AddressableEntity(EntityAddr::Account(hash)) =&gt; hash,
+    _ =&gt; panic!("Not an account key"), 
+};
+//For Contracts
+let contract_hash = match addressable_entity_key {
+    Key::AddressableEntity(EntityAddr::SmartContract(hash)) =&gt; hash,
+    _ =&gt; panic!("Not a contract key"), 
+};
+<span class="boring">}</span></code></pre></pre>
+<h2 id="the-address-merge-in-condor"><a class="header" href="#the-address-merge-in-condor">The Address Merge in Condor</a></h2>
+<p>The “Address Merge” in the Condor upgrade of Casper is a foundational shift, impacting how accounts and smart contracts are identified and interacted with.</p>
+<p><strong>Global State Transformation:</strong></p>
+<p>Post-Condor, all accounts and smart contract addresses residing within the global state will be automatically migrated to the <code>AddressableEntity</code> structure. This means the network itself will recognize and handle these entities using the new format.</p>
+<p><strong>Smart Contract Compatibility Considerations:</strong></p>
+<p>While the global state automatically transitions to <code>AddressableEntity</code>, existing contracts are expected to function without any modification.</p>
+<ul>
+<li>
+<p><strong>Caller Identification:</strong>
+Existing host functions used to identify the caller within your contract will continue to work as before, ensuring no disruption to your contract’s functionality. However, new host functions have been introduced that are specifically designed to work with the AddressableEntity format.</p>
+</li>
+<li>
+<p><strong>External Contract Interaction:</strong> Other contracts may have updated their interfaces to accept AddressableEntity arguments. Its worth to verify the argument types to avoid potential errors.</p>
+</li>
+</ul>
+<blockquote>
+<p><strong>Note</strong></p>
+<ul>
+<li>Upgrading a contract to a newer version may involve complexities, such as changes to the contract’s addressable hash. These changes might require coordination with centralized and decentralized exchanges, as well as communication with your community to ensure a smooth transition.</li>
+</ul>
+</blockquote>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>
