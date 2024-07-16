@@ -1,0 +1,36 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Pull submodule, build and deploy pages
+
+# Controls when the workflow will run
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+  env:
+      MDBOOK_VERSION: 0.4.36
+  steps:
+    - uses: actions/checkout@v4
+    - name: Run a multi-line script
+        run: |
+          git submodule update
+          echo update git submodules.
+    - name: Install mdBook
+      run: |
+        curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf -y | sh
+        rustup update
+        cargo install --version ${MDBOOK_VERSION} mdbook
+    - name: Build with mdBook
+      run: mdbook build
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./book
+
+      # Runs a set of commands using the runners shell
